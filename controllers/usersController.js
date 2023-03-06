@@ -21,10 +21,10 @@ exports.register = [
     .trim()
     .isLength({ min: 1 })
     .escape(),
-  body("birthday")
+  /*body("birthday")
     .optional({ checkFalsy: true })
     .isISO8601()
-    .toDate(),
+    .toDate(),*/
 
   async (req, res, next) => {
     const errors = validationResult(req);
@@ -34,8 +34,7 @@ exports.register = [
       username: req.body.username,
       password: await bcrypt.hash(req.body.password, 10),
       firstName: req.body.firstName,
-      lastName: req.body.lastName,
-      birthday: req.body.birthday
+      lastName: req.body.lastName
     }).save().then(() => {
       console.log("User successfully registered")
     }).catch(err => {

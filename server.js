@@ -4,6 +4,8 @@ const cors = require('cors')
 require('dotenv').config();
 
 const userRoute = require('./routes/users')
+const postRoute = require('./routes/posts')
+const commentRoute = require('./routes/comments')
 
 const app = express();
 
@@ -18,5 +20,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use('/user', userRoute);
+app.use('/post', postRoute)
+app.use('/comment', commentRoute)
 
 app.listen(4000, () => console.log("Server started on port 4000"));

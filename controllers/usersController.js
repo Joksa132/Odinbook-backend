@@ -69,6 +69,35 @@ exports.login = async (req, res) => {
   }
 }
 
+exports.searchProfiles = async (req, res) => {
+  try {
+    const profiles = await User.find({
+      $or: [
+        { firstName: new RegExp(req.params.name, "i") },
+        { lastName: new RegExp(req.params.name, "i") }
+      ]
+      /*
+      $or: [
+        { firstName: { $in: [req.params.name] } },
+        { lastName: { $in: [req.params.name] } }
+      ]
+      */
+    })
+    res.json(profiles)
+  } catch (e) {
+    console.log("Error", e)
+  }
+}
+
+exports.profile = async (req, res) => {
+  try {
+    const profile = await User.find({ _id: req.params.id })
+    res.json(profile)
+  } catch (e) {
+    console.log("Error", e)
+  }
+}
+
 exports.info = (req, res) => {
   res.json(req.user)
 }

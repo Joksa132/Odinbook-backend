@@ -8,4 +8,8 @@ router.post('/login', userController.login)
 
 router.post('/register', userController.register)
 
+router.get('/search/:name', verifyToken, userController.searchProfiles)
+
+router.get('/:id', userController.profile)
+
 module.exports = router;

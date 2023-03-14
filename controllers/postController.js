@@ -33,3 +33,14 @@ exports.getPosts = async (req, res) => {
     console.log("Error", e)
   }
 }
+
+exports.profilePosts = async (req, res) => {
+  try {
+    const posts = await Post.find({ createdBy: req.params.id }).sort({
+      createdAt: "desc"
+    }).populate("createdBy")
+    res.json(posts)
+  } catch (e) {
+    console.log("Error", e)
+  }
+}

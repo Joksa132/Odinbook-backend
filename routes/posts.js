@@ -8,4 +8,8 @@ router.get("/all", postController.getPosts)
 
 router.get("/:id", postController.profilePosts)
 
+router.post("/like", verifyToken, postController.likePost)
+
+router.get("/likes/:id", postController.getLikes)
+
 module.exports = router;

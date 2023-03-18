@@ -10,6 +10,8 @@ router.get("/:id", postController.profilePosts)
 
 router.post("/like", verifyToken, postController.likePost)
 
-router.get("/likes/:id", postController.getLikes)
+router.delete("/delete/:id", verifyToken, postController.deletePost)
+
+router.put("/update/:id", postController.updatePost)
 
 module.exports = router;

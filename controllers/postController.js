@@ -7,19 +7,44 @@ exports.createPost = [
     .isLength({ min: 1 })
     .escape(),
 
-  (req, res, next) => {
+  async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json(errors.array());
 
-    const post = new Post({
-      description: req.body.description,
-      createdBy: req.user.userId
-    }).save().then(() => {
+    try {
+      const post = new Post({
+        description: req.body.description,
+        createdBy: req.user.userId
+      })
+      await post.save()
+      const populatedPost = await post.populate("createdBy");
       console.log("Post created successfully")
-    }).catch(err => {
+      res.json(populatedPost)
+    } catch (err) {
       return next(err)
-    })
-    res.json(post)
+    }
+  }
+]
+
+exports.updatePost = [
+  body("description", "Description required")
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
+
+  async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json(errors.array());
+
+    try {
+      const post = await Post.findOneAndUpdate({ _id: req.params.id }, { description: req.body.description }, { new: true })
+        .populate('createdBy')
+        .populate('createdAt')
+        .populate('likes')
+      res.json(post)
+    } catch (err) {
+      return next(err)
+    }
   }
 ]
 
@@ -68,12 +93,12 @@ exports.likePost = async (req, res) => {
   }
 }
 
-exports.getLikes = async (req, res) => {
+exports.deletePost = async (req, res) => {
   try {
-    const likes = await Post.find({ _id: req.params.id })
-      .populate("likes")
-    res.json(likes)
+    const post = await Post.findOneAndDelete({ _id: req.params.id })
+    console.log("Deleted post")
+    res.json(post)
   } catch (e) {
-    console.log("Error", e)
+    console.log(e)
   }
 }

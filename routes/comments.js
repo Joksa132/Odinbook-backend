@@ -8,4 +8,6 @@ router.get("/:id", commentController.getComments)
 
 router.post("/like", verifyToken, commentController.likeComment)
 
+router.delete("/delete/:id", verifyToken, commentController.deleteComment)
+
 module.exports = router;

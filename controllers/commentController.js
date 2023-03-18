@@ -18,7 +18,9 @@ exports.createComment = [
         forPost: req.body.id
       })
       await comment.save()
-      res.json(comment)
+      const populatedComment = await comment.populate("createdBy");
+      console.log("Comment created successfully")
+      res.json(populatedComment)
     } catch (err) {
       next(err)
     }
@@ -58,5 +60,15 @@ exports.likeComment = async (req, res) => {
   } catch (err) {
     console.log(err);
     res.json();
+  }
+}
+
+exports.deleteComment = async (req, res) => {
+  try {
+    const comment = await Comment.findOneAndDelete({ _id: req.params.id })
+    console.log("Deleted comment")
+    res.json(comment)
+  } catch (e) {
+    console.log(e)
   }
 }

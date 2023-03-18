@@ -49,18 +49,24 @@ exports.likePost = async (req, res) => {
   const post = await Post.findOne({ _id: req.body.postId })
   const isLiked = post.likes.includes(req.user.userId)
 
-  if (!isLiked) {
-    post.likes.push(req.user.userId)
-    await post.save()
-    console.log("liked")
-  } else {
-    const likesFiltered = post.likes.filter(id => id != req.user.userId)
-    post.likes = likesFiltered
-    await post.save()
-    console.log("unliked")
+  try {
+    if (!isLiked) {
+      post.likes.push(req.user.userId)
+      await post.save()
+      console.log("liked")
+    } else {
+      const likesFiltered = post.likes.filter(id => id != req.user.userId)
+      post.likes = likesFiltered
+      await post.save()
+      console.log("unliked")
+    }
+
+    res.json();
+  } catch (err) {
+    console.log(err);
+    res.json();
   }
 }
-
 
 exports.getLikes = async (req, res) => {
   try {

@@ -6,4 +6,6 @@ router.post("/new", verifyToken, commentController.createComment)
 
 router.get("/:id", commentController.getComments)
 
+router.post("/like", verifyToken, commentController.likeComment)
+
 module.exports = router;

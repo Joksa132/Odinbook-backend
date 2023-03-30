@@ -43,9 +43,9 @@ exports.register = [
   }
 ]
 
-exports.login = async (req, res) => {
+exports.login = async (req, res, next) => {
   try {
-    const user = await User.findOne({ username: req.body.username });
+    const user = await User.findOne({ username: req.body.username }).select("+password");
     const isValidPassword = await bcrypt.compare(req.body.password, user.password)
 
     if (!isValidPassword) {
@@ -54,18 +54,23 @@ exports.login = async (req, res) => {
     console.log("Correct password")
     const token = jwt.sign({
       userId: user._id,
-      userName: user.username
+      userName: user.username,
+      firstName: user.firstName,
+      lastName: user.lastName
     }, process.env.secret_key, { expiresIn: "1 day" })
     return res.status(200).json({
       message: "Auth Passed",
       userInfo: {
         Id: user._id,
-        username: user.username
+        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName
       },
       token
     })
   } catch (e) {
     console.log("Error", e)
+    next(e);
   }
 }
 
@@ -76,12 +81,6 @@ exports.searchProfiles = async (req, res) => {
         { firstName: new RegExp(req.params.name, "i") },
         { lastName: new RegExp(req.params.name, "i") }
       ]
-      /*
-      $or: [
-        { firstName: { $in: [req.params.name] } },
-        { lastName: { $in: [req.params.name] } }
-      ]
-      */
     })
     res.json(profiles)
   } catch (e) {
@@ -91,8 +90,46 @@ exports.searchProfiles = async (req, res) => {
 
 exports.profile = async (req, res) => {
   try {
-    const profile = await User.find({ _id: req.params.id })
+    const profile = await User.findOne({ _id: req.params.id })
+      .populate('follows').populate('followedBy')
     res.json(profile)
+  } catch (e) {
+    console.log("Error", e)
+  }
+}
+
+exports.follow = async (req, res) => {
+  const currentUser = await User.findOne({ _id: req.user.userId })
+  const userToFollow = await User.findOne({ _id: req.body.id })
+
+  try {
+    if (currentUser.follows.includes(req.body.id)) {
+      const currentUserUnfollowed = currentUser.follows.filter(id => id != req.body.id)
+      const userToUnfollow = userToFollow.followedBy.filter(id => id != req.user.userId)
+      currentUser.follows = currentUserUnfollowed
+      userToFollow.followedBy = userToUnfollow
+      await currentUser.save()
+      await userToFollow.save()
+      console.log("Unfollowed")
+    } else {
+      currentUser.follows.push(req.body.id)
+      userToFollow.followedBy.push(currentUser._id)
+      await currentUser.save()
+      await userToFollow.save()
+      console.log("Followed")
+    }
+    res.json()
+  } catch (e) {
+    console.log("Error", e)
+  }
+}
+
+exports.getFollows = async (req, res) => {
+  try {
+    const user = await User.findOne({ _id: req.params.id })
+      .populate("follows")
+      .populate("followedBy")
+    res.json(user.follows)
   } catch (e) {
     console.log("Error", e)
   }

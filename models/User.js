@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
-const userSchema = new mongoose.Schema({
+const userSchema = new Schema({
   username: {
     type: String,
     required: true,
@@ -10,7 +11,8 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true,
-    minLength: 4
+    minLength: 4,
+    select: false
   },
   firstName: {
     type: String,
@@ -19,7 +21,15 @@ const userSchema = new mongoose.Schema({
   lastName: {
     type: String,
     required: true
-  }
+  },
+  follows: [{
+    type: Schema.Types.ObjectId,
+    ref: "User"
+  }],
+  followedBy: [{
+    type: Schema.Types.ObjectId,
+    ref: "User"
+  }]
 });
 
 module.exports = mongoose.model('User', userSchema);

@@ -12,4 +12,8 @@ router.get('/search/:name', verifyToken, userController.searchProfiles)
 
 router.get('/:id', userController.profile)
 
+router.post('/follow', verifyToken, userController.follow)
+
+router.get("/follows/:id", userController.getFollows)
+
 module.exports = router;

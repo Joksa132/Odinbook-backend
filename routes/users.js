@@ -10,10 +10,14 @@ router.post('/register', userController.register)
 
 router.get('/search/:name', verifyToken, userController.searchProfiles)
 
+router.get('/searchall', verifyToken, userController.searchAllUsers)
+
 router.get('/:id', userController.profile)
 
 router.post('/follow', verifyToken, userController.follow)
 
 router.get("/follows/:id", userController.getFollows)
+
+router.put("/profilepicture/:id", verifyToken, userController.profilePicture)
 
 module.exports = router;

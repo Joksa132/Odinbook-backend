@@ -3,6 +3,29 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const { body, validationResult } = require("express-validator");
 require('dotenv').config();
+const multer = require("multer");
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "./public/profilepicture")
+  },
+  filename: (req, file, cb) => {
+    cb(null, file.originalname)
+  }
+})
+
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype === "image/jpg" || file.mimetype === "image/png" || file.mimetype === "image/jpeg") {
+    cb(null, true)
+  } else {
+    cb(new Error("Only .jpg, .jpeg, and .png extensions allowed"), false)
+  }
+}
+
+const upload = multer({
+  storage: storage,
+  fileFilter: fileFilter
+})
 
 exports.register = [
   body("username", "Username required")
@@ -88,6 +111,15 @@ exports.searchProfiles = async (req, res) => {
   }
 }
 
+exports.searchAllUsers = async (req, res) => {
+  try {
+    const users = await User.find().sort({ firstName: "1" }).sort({ lastName: "1" })
+    res.json(users)
+  } catch (e) {
+    console.log("Error", e)
+  }
+}
+
 exports.profile = async (req, res) => {
   try {
     const profile = await User.findOne({ _id: req.params.id })
@@ -134,6 +166,23 @@ exports.getFollows = async (req, res) => {
     console.log("Error", e)
   }
 }
+
+exports.profilePicture = [
+  upload.single('image'),
+  async (req, res, next) => {
+    try {
+      if (req.fileValidationError) (
+        console.log(req.fileValidationError)
+      )
+      const user = await User.findOneAndUpdate({ _id: req.params.id }, { profilePicture: req.file.filename })
+        .populate("follows")
+        .populate("followedBy")
+      res.json(user)
+    } catch (err) {
+      console.log(err)
+    }
+  }
+]
 
 exports.info = (req, res) => {
   res.json(req.user)

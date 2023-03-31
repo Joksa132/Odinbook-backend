@@ -29,7 +29,10 @@ const userSchema = new Schema({
   followedBy: [{
     type: Schema.Types.ObjectId,
     ref: "User"
-  }]
+  }],
+  profilePicture: {
+    type: String
+  }
 });
 
 module.exports = mongoose.model('User', userSchema);

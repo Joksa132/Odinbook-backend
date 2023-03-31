@@ -1,5 +1,29 @@
 const Post = require("../models/Post");
+const User = require("../models/User")
 const { body, validationResult } = require("express-validator");
+const multer = require("multer");
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "./public/images/")
+  },
+  filename: (req, file, cb) => {
+    cb(null, file.originalname)
+  }
+})
+
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype === "image/jpg" || file.mimetype === "image/png" || file.mimetype === "image/jpeg") {
+    cb(null, true)
+  } else {
+    cb(new Error("Only .jpg, .jpeg, and .png extensions allowed"), false)
+  }
+}
+
+const upload = multer({
+  storage: storage,
+  fileFilter: fileFilter
+})
 
 exports.createPost = [
   body("description", "Description required")
@@ -20,6 +44,23 @@ exports.createPost = [
       const populatedPost = await post.populate("createdBy");
       console.log("Post created successfully")
       res.json(populatedPost)
+    } catch (err) {
+      return next(err)
+    }
+  }
+]
+
+exports.createPostImage = [
+  upload.single('image'),
+
+  async (req, res, next) => {
+    try {
+      const post = await Post.findOneAndUpdate({ _id: req.params.id }, { image: req.file.filename }, { new: true })
+        .populate('createdBy')
+        .populate('likes')
+        .populate('createdAt')
+
+      res.json(post)
     } catch (err) {
       return next(err)
     }
@@ -53,6 +94,22 @@ exports.getPosts = async (req, res) => {
     const posts = await Post.find().sort({
       createdAt: "desc"
     }).populate('createdBy').populate('likes')
+    res.json(posts)
+  } catch (e) {
+    console.log("Error", e)
+  }
+}
+
+exports.getFollowerPosts = async (req, res) => {
+  try {
+    const user = await User.findOne({ _id: req.user.userId })
+    const following = user.follows.map(follow => follow._id)
+    following.push(user._id)
+
+    const posts = await Post.find({ createdBy: { $in: following } })
+      .sort({ createdAt: "desc" })
+      .populate('createdBy')
+      .populate('likes')
     res.json(posts)
   } catch (e) {
     console.log("Error", e)

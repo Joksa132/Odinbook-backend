@@ -4,7 +4,11 @@ const verifyToken = require("../config/verifyToken");
 
 router.post("/new", verifyToken, postController.createPost)
 
+router.put("/newImage/:id", verifyToken, postController.createPostImage)
+
 router.get("/all", postController.getPosts)
+
+router.get("/follows/all", verifyToken, postController.getFollowerPosts)
 
 router.get("/:id", postController.profilePosts)
 

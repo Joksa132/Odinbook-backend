@@ -2,28 +2,25 @@ const Post = require("../models/Post");
 const User = require("../models/User")
 const { body, validationResult } = require("express-validator");
 const multer = require("multer");
+const cloudinary = require('cloudinary').v2;
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "./public/images/")
-  },
-  filename: (req, file, cb) => {
-    cb(null, file.originalname)
-  }
-})
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
-const fileFilter = (req, file, cb) => {
-  if (file.mimetype === "image/jpg" || file.mimetype === "image/png" || file.mimetype === "image/jpeg") {
-    cb(null, true)
-  } else {
-    cb(new Error("Only .jpg, .jpeg, and .png extensions allowed"), false)
-  }
+async function handleUpload(file) {
+  const res = await cloudinary.uploader.upload(file, {
+    resource_type: "auto",
+  });
+  return res;
 }
 
+const storage = new multer.memoryStorage();
 const upload = multer({
-  storage: storage,
-  fileFilter: fileFilter
-})
+  storage,
+});
 
 exports.createPost = [
   body("description", "Description required")
@@ -55,12 +52,13 @@ exports.createPostImage = [
 
   async (req, res, next) => {
     try {
-      const post = await Post.findOneAndUpdate({ _id: req.params.id }, { image: req.file.filename }, { new: true })
-        .populate('createdBy')
-        .populate('likes')
-        .populate('createdAt')
+      const b64 = Buffer.from(req.file.buffer).toString("base64");
+      let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
+      const cldRes = await handleUpload(dataURI);
 
-      res.json(post)
+      console.log("b64:", b64)
+      console.log("dataURI", dataURI)
+      console.log("cldRes", cldRes)
     } catch (err) {
       return next(err)
     }

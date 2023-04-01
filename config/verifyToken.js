@@ -4,7 +4,7 @@ require('dotenv').config();
 function verifyToken(req, res, next) {
   try {
     const bearerHeader = req.headers['authorization'];
-    console.log(bearerHeader)
+    //console.log(bearerHeader)
     if (!bearerHeader) {
       throw new Error("You must provide authorization header")
     }

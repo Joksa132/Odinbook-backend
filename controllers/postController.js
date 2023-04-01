@@ -11,16 +11,13 @@ cloudinary.config({
 });
 
 async function handleUpload(file) {
-  const res = await cloudinary.uploader.upload(file, {
+  const res = await cloudinary.uploader.upload(file.path, {
     resource_type: "auto",
   });
   return res;
 }
 
-const storage = new multer.memoryStorage();
-const upload = multer({
-  storage,
-});
+const upload = multer({ dest: 'public/images' });
 
 exports.createPost = [
   body("description", "Description required")
@@ -52,13 +49,9 @@ exports.createPostImage = [
 
   async (req, res, next) => {
     try {
-      const b64 = Buffer.from(req.file.buffer).toString("base64");
-      let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
-      const cldRes = await handleUpload(dataURI);
+      const cldRes = await handleUpload(req.file);
 
-      console.log("b64:", b64)
-      console.log("dataURI", dataURI)
-      console.log("cldRes", cldRes)
+      console.log("cldRes:", cldRes)
     } catch (err) {
       return next(err)
     }

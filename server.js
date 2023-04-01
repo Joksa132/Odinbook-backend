@@ -16,7 +16,10 @@ async function main() {
   console.log("Connected to database")
 }
 
-app.use(cors());
+app.use(cors({
+  origin: 'https://odinbook-frontend.netlify.app',
+  optionsSuccessStatus: 200
+}));
 app.use(express.json());
 app.use(express.static('public'))
 

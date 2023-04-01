@@ -51,6 +51,12 @@ exports.createPostImage = [
     try {
       const cldRes = await handleUpload(req.file);
 
+      const post = await Post.findOneAndUpdate({ _id: req.params.id }, { image: cldRes.secure_url }, { new: true })
+        .populate('createdBy')
+        .populate('likes')
+        .populate('createdAt')
+
+      res.json(post)
       console.log("cldRes:", cldRes)
     } catch (err) {
       return next(err)

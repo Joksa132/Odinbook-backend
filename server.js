@@ -18,6 +18,12 @@ async function main() {
 
 app.use(cors({
   origin: 'https://odinbook-frontend.netlify.app',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', "OPTIONS"],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+app.use(cors({
+  origin: 'https://odinbook-frontend.netlify.app',
   credentials: true,
   optionSuccessStatus: 200
 }));
@@ -29,4 +35,4 @@ app.use('/user', userRoute);
 app.use('/post', postRoute)
 app.use('/comment', commentRoute)
 
-app.listen(4000, () => console.log("Server started on port 4000"));
+app.listen(process.env.PORT, () => console.log("Server started on port 4000"));

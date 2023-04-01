@@ -4,28 +4,22 @@ const User = require("../models/User");
 const { body, validationResult } = require("express-validator");
 require('dotenv').config();
 const multer = require("multer");
+const cloudinary = require('cloudinary').v2;
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "./public/profilepicture")
-  },
-  filename: (req, file, cb) => {
-    cb(null, file.originalname)
-  }
-})
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
-const fileFilter = (req, file, cb) => {
-  if (file.mimetype === "image/jpg" || file.mimetype === "image/png" || file.mimetype === "image/jpeg") {
-    cb(null, true)
-  } else {
-    cb(new Error("Only .jpg, .jpeg, and .png extensions allowed"), false)
-  }
+async function handleUpload(file) {
+  const res = await cloudinary.uploader.upload(file.path, {
+    resource_type: "auto",
+  });
+  return res;
 }
 
-const upload = multer({
-  storage: storage,
-  fileFilter: fileFilter
-})
+const upload = multer({ dest: 'public/profilepicture' });
 
 exports.register = [
   body("username", "Username required")
@@ -177,14 +171,15 @@ exports.getFollows = async (req, res) => {
 
 exports.profilePicture = [
   upload.single('image'),
+
   async (req, res, next) => {
     try {
-      if (req.fileValidationError) (
-        console.log(req.fileValidationError)
-      )
-      const user = await User.findOneAndUpdate({ _id: req.params.id }, { profilePicture: req.file.filename })
+      const cldRes = await handleUpload(req.file);
+
+      const user = await User.findOneAndUpdate({ _id: req.params.id }, { profilePicture: cldRes.secure_url })
         .populate("follows")
         .populate("followedBy")
+
       res.json(user)
     } catch (err) {
       console.log(err)

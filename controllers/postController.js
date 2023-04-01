@@ -57,7 +57,6 @@ exports.createPostImage = [
         .populate('createdAt')
 
       res.json(post)
-      console.log("cldRes:", cldRes)
     } catch (err) {
       return next(err)
     }

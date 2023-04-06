@@ -22,7 +22,7 @@ exports.createComment = [
       console.log("Comment created successfully")
       res.json(populatedComment)
     } catch (err) {
-      next(err)
+      return res.status(400).json(err)
     }
   }
 ]

@@ -39,7 +39,7 @@ exports.createPost = [
       console.log("Post created successfully")
       res.json(populatedPost)
     } catch (err) {
-      return next(err)
+      return res.status(400).json(err)
     }
   }
 ]
@@ -80,7 +80,7 @@ exports.updatePost = [
         .populate('likes')
       res.json(post)
     } catch (err) {
-      return next(err)
+      return res.status(400).json(err)
     }
   }
 ]

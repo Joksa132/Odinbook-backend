@@ -58,7 +58,7 @@ exports.createPostImage = [
 
       res.json(post)
     } catch (err) {
-      return res.json(err)
+      return res.status(400)
     }
   }
 ]
